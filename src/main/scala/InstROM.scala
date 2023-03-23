@@ -5,6 +5,9 @@ import chisel3.util._
 import chisel3.util.experimental.{loadMemoryFromFile, loadMemoryFromFileInline}
 import firrtl.annotations.MemoryLoadFileType
 
+import scala.collection.mutable.ArrayBuffer
+import scala.io.Source
+
 class InstROM extends  Module{
   val pcWidth = 32
   val memDepth = 256
@@ -19,11 +22,14 @@ class InstROM extends  Module{
 
   ///// Section for ROM
 
-  val programMemory = Mem(memDepth, UInt(memWidth.W))
+  //val programMemory = Mem(memDepth, UInt(memWidth.W))
   // Load the ROM value from Hex file
-  loadMemoryFromFileInline(programMemory, "additionals/ROM.hex", MemoryLoadFileType.Hex)
+  //loadMemoryFromFileInline(programMemory, "additionals/ROM.hex", MemoryLoadFileType.Hex)
+   //val programMemory = VecInit(Seq.fill(128)(0.U(memWidth.W)))
+   val k = Tools.readmemh("additionals/ROM.hex")
+   val programMemory = VecInit(k.map(_.U(8.W)))
 
-
+  println(s"The Length is ${k.length}")
   //////// ENd of Rom Logic
   val PC = WireInit(0.U(pcWidth.W))
   PC := io.readBaseAddress
@@ -31,7 +37,7 @@ class InstROM extends  Module{
   io.instData := tInsData
   //printf("The Value is dd = %d \n",programMemory(11))
   //when(io.en === 1.U){
-
+ // printf(p"\n the data is ${Hexadecimal(programMemory1(PC))} and PC=${Hexadecimal(PC)} \n")
     // printf("The Value is%d \n",programMemory(10))
     tInsData := Cat(programMemory(PC + 3.U),programMemory(PC + 2.U),programMemory(PC + 1.U),programMemory(PC + 0.U))
 
@@ -40,4 +46,21 @@ class InstROM extends  Module{
       // Do Nothing
 
    // }
+}
+
+
+// Solution to load from File from Stackoverflow
+object Tools{
+  def readmemh(path: String): Array[BigInt] = {
+    val buffer = new ArrayBuffer[BigInt]
+    for (line <- Source.fromFile(path).getLines) {
+      //val tokens: Array[String] = line.split("(//)").map(_.trim)
+      if (line != "") {
+        val i = Integer.parseInt(line, 16)
+        buffer.append(i)
+      }
+    }
+    buffer.toArray
+  }
+
 }

@@ -10,11 +10,12 @@ class RV32imfTester extends AnyFlatSpec with ChiselScalatestTester with Matchers
   behavior of "RV32IMF is "
   "Initial Run FSM " should "Load move all the state" in {
     test(new RV32imf()).withAnnotations(annos){
-      c=>
-        c.clock.step(10)
+      dut=>
+        dut.clock.step(200)
     }
 
 
   }
 
 }
+

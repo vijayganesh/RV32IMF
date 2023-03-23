@@ -38,6 +38,7 @@ class RV32imf extends  Module{
   decoder.io.InstructionData := ProgramMem.io.instData
   decoder.io.en := 0.U
  decoder.io.wrData := 0.U // Initial state
+  decoder.io.pcValue := PC
   // Store the data from ALU result or from RAM
   //decoder.io.wrData := exealu.io.aluResult.asUInt //0.U // This value should be updated based on signal passed
  // decoder.io.ctlRead := 0.U
@@ -46,7 +47,7 @@ class RV32imf extends  Module{
    exealu.io.valueA := decoder.io.rs1Execute.asSInt
    exealu.io.valueB := decoder.io.rs2Execute.asSInt
    exealu.io.en := 0.U
-   exealu.io.exeOpcode := decoder.io.aluOpcode
+   exealu.io.exeOpcode := (decoder.io.aluOpcode)
 
   //val RamData = WireInit(0.S(SInt(32.W)))
  /// internal RAM
@@ -55,6 +56,7 @@ class RV32imf extends  Module{
  internalRam.io.address := exealu.io.aluResult.asUInt
  internalRam.io.wrOp := decoder.io.isDataRAMWrite
  internalRam.io.rdOp := decoder.io.isDataRAMRead
+  internalRam.io.datatype := decoder.io.ramDataType
 // RamData := internalRam.io.RAMDataOut
 
  // val xreg  = Module(new xreg())
@@ -143,6 +145,22 @@ class RV32imf extends  Module{
 
   }
 */
+ // Pc logic depends on
+  // deocoder isBranchInst and result is true then change the new value
+  val pcAddreTemp = WireInit(0.S(Consts.pcWidth.W))
+  when(decoder.io.isBrancInst === true.B){
+    when(exealu.io.aluResult(0) === 1.U){
+      pcAddreTemp := decoder.io.brRelativeAddress -4.S // since 4 is added at begining
+    }
+      .otherwise{
+        pcAddreTemp := 4.S
+      }
 
- PC := PC+4.U
+  }.elsewhen(decoder.io.isJumpInst ===true.B){
+    pcAddreTemp := decoder.io.brRelativeAddress - 4.S
+  }
+    .otherwise{
+      pcAddreTemp := 4.S
+    }
+ PC := PC+pcAddreTemp.asUInt
 }

@@ -37,7 +37,9 @@ class xreg extends  Module{
     }
 
     when(io.ctlWriteMem === 1.U){
-      X(io.RegWR) := io.RegWrData
+      when(io.RegWR =/= 0.U) {
+        X(io.RegWR) := io.RegWrData
+      }
     }
 
  // }

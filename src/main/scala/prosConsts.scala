@@ -3,6 +3,12 @@ package org.vricsa
 import chisel3.experimental.ChiselEnum
 import chisel3._
 
+/**
+ * Not Implemented
+ *  - CSR
+ *  - AUIPC
+ *  -
+ */
 object WordType extends ChiselEnum {
   val wByte,wHalfWord,wWord = Value
 }
@@ -32,9 +38,21 @@ object ALUOperation extends  ChiselEnum {
   val XOR = Value(7.U)
   val LessThanS = Value(8.U)
   val LessThanU = Value(9.U)
+  val brEQL = Value(10.U)
+  val brNEQL = Value(11.U)
+  val brLTS = Value(12.U)
+  val brLTU = Value(13.U)
+  val brGRES = Value(14.U)
+  val brGREU = Value(15.U)
+  //val NOP = Value(15.U) // Mostly will not reach
 
 }
 object  Consts {
   val XLEN = 32
+  val pcWidth = 32
 
 }
+
+/**
+ *
+ */
